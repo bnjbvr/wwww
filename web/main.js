@@ -1,8 +1,6 @@
-const LIMIT = 10000;
+const LIMIT = 100;
 
 var worker = new Worker('worker.js');
-
-var i = 0;
 
 var results = [];
 
@@ -12,12 +10,10 @@ window.onunload = function() {
 };
 
 worker.onmessage = function(e) {
-	var recvPrimes = e.data.reduce(function(a,b) { return a + ' ' + b; });
+	if (e.data.length === 0)
+		return;
 
-	if (++i > LIMIT) {
-		// Force closes the worker if we got over the LIMIT
-		worker.terminate();
-	}
+	var recvPrimes = e.data.reduce(function(a,b) { return a + ' ' + b; });
 
 	document.getElementById('primes').textContent += recvPrimes + ' ';
 };
@@ -27,6 +23,23 @@ worker.onerror = function(e) {
 			' : ' + e.message);
 };
 
-worker.postMessage('go'); // starts the worker
-console.log('[MAIN] End of main.');
+// Sends the order to compute prime numbers in [low, high]. Values returned may be
+// slightly above high.
+
+// The server gives limit values to the web page ; web worker computes the primes in
+// the interval, then sends the new values to the server.
+// TODO bind server logic and Order.
+Order = function Order(low, high) {
+	worker.postMessage({"type":"o", "low": low, "high": high});
+}
+
+// Once the server has received values, it keeps all web workers informed, by sending
+// them the new primes computed. This function should be called whenever the server
+// received new primes.
+// TODO bind server logic and Primes
+Primes = function Primes(primes) {
+	worker.postMessage({"type":"p", "data":primes});
+}
+
+new Order(1, 10); // starts the worker
 

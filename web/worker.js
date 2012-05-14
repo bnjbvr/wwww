@@ -1,26 +1,31 @@
 var worker = (function() {
 
-var primes = [2, 3];
+var primes = {}; 
 
 function isPrime(n) {
 	var limit = Math.sqrt( n );
-	for (var i = 0, _l = primes.length; i < _l; ++i) {
-		if (primes[i] > limit)
+	//for (var i = 0, _l = primes.length; i < _l; ++i) {
+	for (var i in primes) { 
+		if (i > limit)
 			return true;
-		if (n % primes[i] === 0)
+		if (n % i === 0)
 			return false;
 	}
 	return true;
 };
 
 function addPrime(n) {
-	primes.push( n );
-	send( n );
+	if (!primes[n]) {
+		primes[n] = true;
+		send( n );
+	}
 }
 
+var low = -1, high = 1;
 function genPrimes() {
-	var gen1 = -1, gen2 = 1;
-	while( true ) {
+	var gen1 = low - (low % 6) - 1;
+	var gen2 = gen1 + 2;
+	while( gen1 < low || gen2 < high ) {
 		gen1 += 6;
 		gen2 += 6;
 		if ( isPrime( gen1 ) )
@@ -28,6 +33,8 @@ function genPrimes() {
 		if ( isPrime( gen2 ) )
 			addPrime( gen2 );
 	}
+	flushBuffer();
+	launched = false;
 };
 
 /***************/
@@ -45,11 +52,28 @@ function send(data) {
 	}
 }
 
+function flushBuffer() {
+	postMessage( buffer );
+	buffer = [];
+}
+
 var w = {
 	onmessage: function(e) {
 		if (!launched) {
-			launched = true;
-			run();
+			var msg = e.data;
+			if (msg.type === 'p') // updates primes
+			{
+				for (var i = 0, _l = msg.data.length; i < _l; ++i)
+				{
+					primes[ msg.data[i] ] = true;
+				}
+			} else if (msg.type === 'o')
+			{
+				launched = true;
+				low = msg.low;
+				high = msg.high;
+				run();
+			}
 		}
 	},
 };
