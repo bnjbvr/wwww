@@ -1,5 +1,3 @@
-const LIMIT = 100;
-
 var worker = new Worker('worker.js');
 
 var results = [];
@@ -14,7 +12,6 @@ worker.onmessage = function(e) {
 		return;
 
 	var recvPrimes = e.data.reduce(function(a,b) { return a + ' ' + b; });
-
 	document.getElementById('primes').textContent += recvPrimes + ' ';
 };
 

@@ -1,10 +1,9 @@
 var worker = (function() {
 
-var primes = {}; 
+var primes = {2: true, 3: true}; 
 
 function isPrime(n) {
 	var limit = Math.sqrt( n );
-	//for (var i = 0, _l = primes.length; i < _l; ++i) {
 	for (var i in primes) { 
 		if (i > limit)
 			return true;
