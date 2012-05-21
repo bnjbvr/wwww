@@ -1,0 +1,2 @@
+Hey ! This text is from a file, read by a Worker !
+Amazing, isn't it ?
