@@ -24,6 +24,7 @@ var low = -1, high = 1;
 function genPrimes() {
 	var gen1 = low - (low % 6) - 1;
 	var gen2 = gen1 + 2;
+    var beginTime = new Date();
 	while( gen1 < low || gen2 < high ) {
 		gen1 += 6;
 		gen2 += 6;
@@ -33,6 +34,8 @@ function genPrimes() {
 			addPrime( gen2 );
 	}
 	flushBuffer();
+    var endTime = new Date();
+    postMessage({type:'t', beginTime: beginTime, endTime: endTime});
 	launched = false;
 };
 
@@ -45,14 +48,15 @@ var buffer = [];
 
 function send(data) {
 	buffer.push( data );
+    /*
 	if ( buffer.length >= 10 ) {
-		postMessage( buffer );
-		buffer = [];
+        flushBuffer();
 	}
+    */
 }
 
 function flushBuffer() {
-	postMessage( buffer );
+	postMessage({type:'p', primes:buffer});
 	buffer = [];
 }
 
@@ -66,7 +70,7 @@ var w = {
 				{
 					primes[ msg.data[i] ] = true;
 				}
-			} else if (msg.type === 'o')
+			} else if (msg.type === 'o') // order to compute
 			{
 				launched = true;
 				low = msg.low;

@@ -3,10 +3,24 @@
     <head>  
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />  
     <title>WebWorkers</title>  
-    <script type="text/javascript" src="main.js">  
-    </script>  
+    <script type="text/javascript" src="sio/socket.io.js"></script>
+    <script>
+        var sio = io.connect('http://localhost:1337');
+        sio.on('order', function(data) {
+            console.log('Data received from server : ' + JSON.stringify(data) );
+            wwww.work( data );
+        });
+
+        document.wwww = document.wwww || {};
+        wwww = document.wwww;
+        wwww.emit = function(canal, data) {
+            console.log('Sending data to server on canal ' + canal + '...');
+            sio.emit(canal, data);
+        };
+    </script>
+    <script type="text/javascript" src="main.js"></script>
     </head>  
     <body>  
-	<p id="primes">2 3 </p>
+	<p id="primes">Il se passe des choses...</p>
     </body>  
     </html>  
